@@ -1,5 +1,8 @@
 package com.example.isRenePissed;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
@@ -10,6 +13,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -50,13 +54,26 @@ public class RestClient {
         return String.format("%s://%s?%s", protocol, domain, URLEncodedUtils.format(this.urlParams, "utf-8"));
     }
 
-    public String getIsPissed()
+    public JSONObject getIsPissed()
     {
         try {
-            return this.doGet().getString("status");
+            return this.doGet().getJSONObject("status");
         } catch (Exception e) {
-            return e.getMessage();
+            try {
+                return new JSONObject(String.format("{\"message\": \"%s\"}", e.getMessage()));
+            } catch (JSONException e1) {
+                // something when terribly wrong
+                return new JSONObject();
+            }
         }
+    }
+
+    public Bitmap getPissedImage(String uri) throws IOException {
+        HttpGet request = new HttpGet(uri);
+
+        HttpResponse response = client.execute(request);
+
+        return BitmapFactory.decodeStream(response.getEntity().getContent());
     }
 
     private JSONObject doGet() throws TooPissedToRespondException
