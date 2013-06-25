@@ -35,48 +35,21 @@ public class MyActivity extends Activity
         isHeBtn.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                new AsyncTask<Void, Void, JSONObject>() {
+                new AsyncTask<Void, Void, Pissed>() {
                     @Override
-                    protected JSONObject doInBackground(Void... voids) {
+                    protected Pissed doInBackground(Void... voids) {
 
-                        return new RestClient().getIsPissed();
+                        return new RestClient().getPissed();
                     }
 
                     @Override
-                    protected void onPostExecute(JSONObject status) {
-                        super.onPostExecute(status);
-
-                        String statusMessage = null;
-                        try {
-                            statusMessage = status.getString("message");
-                            new AsyncTask<String, Void, Bitmap>() {
-                                @Override
-                                protected Bitmap doInBackground(String... strings) {
-                                    try {
-                                        return new RestClient().getPissedImage(strings[0]);
-                                    } catch (IOException e) {
-                                        return null;
-                                    }
-                                }
-
-                                @Override
-                                protected void onPostExecute(Bitmap bitmap) {
-                                    super.onPostExecute(bitmap);
-                                    if (bitmap != null) {
-                                        MyActivity.this.layout.setBackground(new BitmapDrawable(bitmap));
-                                    }
-                                }
-                            }.execute(status.getString("img"));
-                        } catch (Exception e) {
-                            statusMessage = "Oops!! He is really pissed off now!";
+                    protected void onPostExecute(Pissed pissed) {
+                        super.onPostExecute(pissed);
+                        Bitmap img;
+                        if ((img = pissed.getImg()) != null) {
+                            MyActivity.this.layout.setBackground(new BitmapDrawable(img));
                         }
-//                        try {
-//                            JSONObject status = new JSONObject(s).getJSONObject("status");
-//                            statusMessage = status.getString("message");
-//                        } catch (JSONException e) {
-//                            statusMessage = "Oops!! He is really pissed off right now!";
-//                        }
-                        MyActivity.this.isHeTxt.setText(statusMessage);
+                        MyActivity.this.isHeTxt.setText(pissed.getMessage());
                     }
                 }.execute();
             }

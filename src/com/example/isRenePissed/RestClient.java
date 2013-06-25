@@ -54,18 +54,17 @@ public class RestClient {
         return String.format("%s://%s?%s", protocol, domain, URLEncodedUtils.format(this.urlParams, "utf-8"));
     }
 
-    public JSONObject getIsPissed()
+    public Pissed getPissed()
     {
+        Pissed pissed = new Pissed();
         try {
-            return this.doGet().getJSONObject("status");
+            JSONObject status = this.doGet().getJSONObject("status");
+            pissed.setMessage(status.getString("message"));
+            pissed.setImg(this.getPissedImage(status.getString("img")));
         } catch (Exception e) {
-            try {
-                return new JSONObject(String.format("{\"message\": \"%s\"}", e.getMessage()));
-            } catch (JSONException e1) {
-                // something when terribly wrong
-                return new JSONObject();
-            }
+
         }
+        return pissed;
     }
 
     public Bitmap getPissedImage(String uri) throws IOException {
